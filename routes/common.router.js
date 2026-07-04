@@ -15,6 +15,8 @@ router.get("/property-highlights", controllers.getPropertyHighlights)
 
 router.post("/property-highlights", controllers.addPropertyHighlights)
 
+router.get("/gallery-images", controllers.getGalleryImages)
+
 router.use(auth);
 
 router.post(

@@ -61,7 +61,7 @@ export const addFeatureOptions = asyncErrorHandler(async (req) => {
 
     if (exists) throw new Error(`${exists.name} already exists`, 400);
 
-    const data = await model.FeatureOptions({name}).save()
+    const data = await model.FeatureOptions({ name }).save()
 
     return new Response(`Option added successfully`, { data }, 200);
 
@@ -99,7 +99,7 @@ export const addPropertyHighlights = asyncErrorHandler(async (req) => {
 
     if (exists) throw new Error(`${exists.name} already exists`, 400);
 
-    const data = await model.propertyHiglights({name}).save()
+    const data = await model.propertyHiglights({ name }).save()
 
     return new Response(`Option added successfully`, { data }, 200);
 
@@ -108,4 +108,22 @@ export const addPropertyHighlights = asyncErrorHandler(async (req) => {
     throw new Error(error.message);
 
   }
+})
+
+export const getGalleryImages = asyncErrorHandler(async (req) => {
+  try {
+
+    const data = await model.destination.find({ status: 0 }).select("galleryImages").lean();
+
+    const allGalleryImages = data.flatMap(
+      property => property.galleryImages || []
+    );
+
+    return new Response(null, { data: allGalleryImages }, 200);
+
+  } catch (error) {
+
+    throw new Error(error.message);
+  }
+
 })
