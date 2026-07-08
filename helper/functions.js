@@ -180,6 +180,8 @@ export const sendMail = async ({from,  subject, html }) => {
     },
   });
 
+  console.log(process.env.EMAIL_USER,'jjjjjj',process.env.EMAIL_PASS)
+
   await transporter.sendMail({
     from: "luneviaEnquiry@gmail.com",
     to: process.env.EMAIL_USER,

@@ -12,7 +12,7 @@ export const web = asyncErrorHandler(async (req) => {
         if (isNull(email)) throw new Error("email is required", 412);
 
         if (isNull(mobile)) throw new Error("mobile is required", 412);
-
+        console.log('contact adding')
         await model
             .contact({
                 firstName,
@@ -23,7 +23,7 @@ export const web = asyncErrorHandler(async (req) => {
                 comments,
             })
             .save();
-
+        console.log('contact adding 2')
         await sendMail({
             from: "luneviaEnquiry@gmail.com",
             subject: `New Enquiry From ${firstName} ${lastName}`,
@@ -94,6 +94,7 @@ export const web = asyncErrorHandler(async (req) => {
         console.log('contact added')
         return new Response("Thank you for contacting us!", null, 200);
     } catch (error) {
+        console.log('contact adding failed')
         throw new Error(error.message);
     }
 });
