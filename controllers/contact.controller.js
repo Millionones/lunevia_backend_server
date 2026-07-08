@@ -4,29 +4,30 @@ import model from "../model/index.js";
 import { paginationParams, sendMail, unwantedFields } from "../helper/functions.js";
 
 export const web = asyncErrorHandler(async (req) => {
-  const { firstName, lastName, email, mobile, subject, comments } = req.body;
+    try {
+        const { firstName, lastName, email, mobile, subject, comments } = req.body;
 
-  if (isNull(firstName)) throw new Error("name is required", 412);
+        if (isNull(firstName)) throw new Error("name is required", 412);
 
-  if (isNull(email)) throw new Error("email is required", 412);
+        if (isNull(email)) throw new Error("email is required", 412);
 
-  if (isNull(mobile)) throw new Error("mobile is required", 412);
+        if (isNull(mobile)) throw new Error("mobile is required", 412);
 
-  await model
-    .contact({
-      firstName,
-      lastName,
-      email,
-      mobile,
-      subject,
-      comments,
-    })
-    .save();
+        await model
+            .contact({
+                firstName,
+                lastName,
+                email,
+                mobile,
+                subject,
+                comments,
+            })
+            .save();
 
-  await sendMail({
-    from: "luneviaEnquiry@gmail.com",
-    subject: `New Enquiry From ${firstName} ${lastName}`,
-    html: `
+        await sendMail({
+            from: "luneviaEnquiry@gmail.com",
+            subject: `New Enquiry From ${firstName} ${lastName}`,
+            html: `
                 <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
 
                     <h2 style="color: #000;">
@@ -89,18 +90,21 @@ export const web = asyncErrorHandler(async (req) => {
 
                 </div>
             `,
-  })
-
-  return new Response("Thank you for contacting us!", null, 200);
+        })
+        console.log('contact added')
+        return new Response("Thank you for contacting us!", null, 200);
+    } catch (error) {
+        throw new Error(error.message);
+    }
 });
 
 export const list = asyncErrorHandler(async (req) => {
-  const query = { status: 0 };
-  const { limit, skip } = paginationParams(req.query);
+    const query = { status: 0 };
+    const { limit, skip } = paginationParams(req.query);
 
-  const count = await model.contact.countDocuments(query);
+    const count = await model.contact.countDocuments(query);
 
-  const data = await model.contact.find(query).skip(skip).limit(limit).select(unwantedFields()).sort({ _id: -1 });
+    const data = await model.contact.find(query).skip(skip).limit(limit).select(unwantedFields()).sort({ _id: -1 });
 
-  return new Response(null, { count, data }, 200);
+    return new Response(null, { count, data }, 200);
 });
