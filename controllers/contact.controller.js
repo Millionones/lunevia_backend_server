@@ -24,73 +24,73 @@ export const web = asyncErrorHandler(async (req) => {
             })
             .save();
         console.log('contact adding 2')
-        await sendMail({
-            from: "luneviaEnquiry@gmail.com",
-            subject: `New Enquiry From ${firstName} ${lastName}`,
-            html: `
-                <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        // await sendMail({
+        //     from: "luneviaEnquiry@gmail.com",
+        //     subject: `New Enquiry From ${firstName} ${lastName}`,
+        //     html: `
+        //         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
 
-                    <h2 style="color: #000;">
-                        New Enquiry Received
-                    </h2>
+        //             <h2 style="color: #000;">
+        //                 New Enquiry Received
+        //             </h2>
 
-                    <p>
-                        You have received a new enquiry through the website contact form.
-                    </p>
+        //             <p>
+        //                 You have received a new enquiry through the website contact form.
+        //             </p>
 
-                    <table 
-                        cellpadding="10" 
-                        cellspacing="0" 
-                        border="1" 
-                        style="border-collapse: collapse; width: 100%; max-width: 600px;"
-                    >
+        //             <table 
+        //                 cellpadding="10" 
+        //                 cellspacing="0" 
+        //                 border="1" 
+        //                 style="border-collapse: collapse; width: 100%; max-width: 600px;"
+        //             >
 
-                        <tr>
-                            <td><strong>First Name</strong></td>
-                            <td>${firstName}</td>
-                        </tr>
+        //                 <tr>
+        //                     <td><strong>First Name</strong></td>
+        //                     <td>${firstName}</td>
+        //                 </tr>
 
-                        <tr>
-                            <td><strong>Last Name</strong></td>
-                            <td>${lastName}</td>
-                        </tr>
+        //                 <tr>
+        //                     <td><strong>Last Name</strong></td>
+        //                     <td>${lastName}</td>
+        //                 </tr>
 
-                        <tr>
-                            <td><strong>Email Address</strong></td>
-                            <td>${email}</td>
-                        </tr>
+        //                 <tr>
+        //                     <td><strong>Email Address</strong></td>
+        //                     <td>${email}</td>
+        //                 </tr>
 
-                        <tr>
-                            <td><strong>Mobile Number</strong></td>
-                            <td>${mobile}</td>
-                        </tr>
+        //                 <tr>
+        //                     <td><strong>Mobile Number</strong></td>
+        //                     <td>${mobile}</td>
+        //                 </tr>
 
-                        <tr>
-                            <td><strong>Subject</strong></td>
-                            <td>${subject}</td>
-                        </tr>
+        //                 <tr>
+        //                     <td><strong>Subject</strong></td>
+        //                     <td>${subject}</td>
+        //                 </tr>
 
-                        <tr>
-                            <td><strong>Comments / Questions</strong></td>
-                            <td>${comments}</td>
-                        </tr>
+        //                 <tr>
+        //                     <td><strong>Comments / Questions</strong></td>
+        //                     <td>${comments}</td>
+        //                 </tr>
 
-                    </table>
+        //             </table>
 
-                    <br />
+        //             <br />
 
-                    <p>
-                        Please respond to this enquiry at the earliest convenience.
-                    </p>
+        //             <p>
+        //                 Please respond to this enquiry at the earliest convenience.
+        //             </p>
 
-                    <p>
-                        Regards,<br />
-                        Website Enquiry System
-                    </p>
+        //             <p>
+        //                 Regards,<br />
+        //                 Website Enquiry System
+        //             </p>
 
-                </div>
-            `,
-        })
+        //         </div>
+        //     `,
+        // })
         console.log('contact added')
         return new Response("Thank you for contacting us!", null, 200);
     } catch (error) {
