@@ -24,4 +24,9 @@ const schema = new Schema(
     }
 );
 
+// Admin bookings list filters by status and sorts by _id; bookings are also
+// grouped per destination.
+schema.index({ status: 1, _id: -1 });
+schema.index({ destination: 1 });
+
 export default model("bookings", schema);

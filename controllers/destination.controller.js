@@ -54,12 +54,13 @@ export const create = asyncErrorHandler(async (req) => {
     }
 
     if (roomDetails && roomDetails.length > 0) {
-        roomDetails = roomDetails.map((room) => {
-            let slug = generatePermalink(room.title);
-            return { ...room, slug }
-        })
+        // Strip the UI-only `completed` flag the wizard adds to each room.
+        roomDetails = roomDetails.map(({ completed, ...room }) => ({
+            ...room,
+            slug: room.slug || generatePermalink(room.title),
+        }));
     }
-    console.log('roomDetails', roomDetails)
+
     // Create data
     const data = await new model.destination({
         title,
@@ -120,18 +121,14 @@ export const update = asyncErrorHandler(async (req) => {
         throw new Error("Data not found", 404);
     }
 
-    if (roomDetails?.length != data.roomDetails?.length) {
-        if (roomDetails?.length > data.roomDetails?.length) {
-            roomDetails = roomDetails.map((room) => {
-                let slug = ""
-                if(room.slug) slug = room.slug
-                else slug = generatePermalink(room.title);
-                return { ...room, slug }
-            })
-        }
+    if (roomDetails && roomDetails.length > 0) {
+        // Strip the UI-only `completed` flag; keep existing room slugs, generate
+        // one for any newly added room.
+        roomDetails = roomDetails.map(({ completed, ...room }) => ({
+            ...room,
+            slug: room.slug || generatePermalink(room.title),
+        }));
     }
-
-    // return console.log('roomDetails', roomDetails)
 
     if (!isNull(title)) data.title = title;
     if (!isNull(mainImage)) data.mainImage = mainImage;

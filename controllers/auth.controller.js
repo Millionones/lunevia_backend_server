@@ -1,12 +1,10 @@
 import { asyncErrorHandler, Error, Response } from "express-error-catcher";
 import model from "../model/index.js";
+import { cookieOptions } from "../config.js";
 import jwt from "jsonwebtoken";
 
 export const loginUser = asyncErrorHandler(async (req, res) => {
   const { email, password } = req.body;
-
-  // temp email - admin@lunevia.com
-  // temp pass - admin@124
 
   const user = await model.User.findOne({ email });
 
@@ -29,9 +27,7 @@ export const loginUser = asyncErrorHandler(async (req, res) => {
   const accessTokenMaxAge = 30 * 24 * 60 * 60 * 1000;
 
   res.cookie("tkn", token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
+    ...cookieOptions,
     maxAge: accessTokenMaxAge,
   });
 
@@ -48,11 +44,7 @@ export const loginUser = asyncErrorHandler(async (req, res) => {
 
 export const logoutUser = asyncErrorHandler(async (req, res) => {
   try {
-    res.clearCookie("tkn", {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-    });
+    res.clearCookie("tkn", cookieOptions);
 
     return new Response("Logout successful", null, 200);
   } catch (error) {
@@ -60,24 +52,3 @@ export const logoutUser = asyncErrorHandler(async (req, res) => {
     throw new Error("Unable to logout, please try again later", 400);
   }
 });
-
-// import bcrypt  from 'bcryptjs'
-// const registerUser = async (user) => {
-//   const { name, email, password } = user;
-
-//   const existingUser = await model.User.findOne({ email });
-
-//   if (existingUser) throw new Error("User already exists", 400);
-
-//   const hashedPassword = await bcrypt.hash(password, 10);
-
-//   const newUser = await model.User.create({
-//     name,
-//     email,
-//     password: hashedPassword,
-//   });
-
-//   console.log('user has created', newUser)
-// }
-
-// registerUser({name:'admin',email:'admin@lunevia.com',password:'admin@124'})

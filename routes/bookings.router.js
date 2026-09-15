@@ -6,8 +6,9 @@ import * as controller from "../controllers/bookings.controller.js";
 
 const router = express.Router();
 
-router.get("/", controller.list)
+// Bookings contain customer PII — protect both the list and the status update.
+router.get("/", auth, controller.list)
 
-router.put("/:id", controller.update)
+router.put("/:id", auth, controller.update)
 
 export default router;

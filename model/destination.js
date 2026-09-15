@@ -61,4 +61,10 @@ const schema = new Schema(
     }
 )
 
+// Indexes for the hot query paths:
+// - detail lookups: findOne({ slug, status })
+// - list endpoints: find({ status }).sort({ _id: -1 })
+schema.index({ slug: 1, status: 1 });
+schema.index({ status: 1, _id: -1 });
+
 export default model("destination", schema);

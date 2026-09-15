@@ -29,8 +29,17 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "public")));
 app.use(helmet());
+// Long-lived cache for static assets in /public (immutable content-hashed
+// files benefit most; plain files still revalidate cheaply).
+app.use(
+  express.static(path.join(__dirname, "public"), {
+    maxAge: "7d",
+    setHeaders: (res) => {
+      res.setHeader("Cache-Control", "public, max-age=604800");
+    },
+  })
+);
 
 app.use("/api", routes);
 

@@ -6,9 +6,9 @@ import * as controllers from "../controllers/blog.controller.js";
 
 import auth from "../middleware/auth.js";
 
-router.get("/", controllers.list).post("/", controllers.create);
+router.get("/", controllers.list).post("/", auth, controllers.create);
 
-router.get("/:slug", controllers.getDetails).put("/:slug", controllers.update).delete("/:slug", controllers.deleteBlog);
+router.get("/:slug", controllers.getDetails).put("/:slug", auth, controllers.update).delete("/:slug", auth, controllers.deleteBlog);
 
 
 

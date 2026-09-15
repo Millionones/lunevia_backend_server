@@ -15,5 +15,7 @@ router.get("/blogs", controllers.getBlogList)
 
 router.get("/blogs/:slug", controllers.getBlogDetails)
 
+router.get("/page/:page", controllers.getPageContent)
+
 
 export default router;

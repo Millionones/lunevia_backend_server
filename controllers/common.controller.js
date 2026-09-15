@@ -1,129 +1,93 @@
 import { asyncErrorHandler, Error, Response } from "express-error-catcher";
 import model from "../model/index.js";
-import fs from "fs";
-import { promisify } from "util";
-import { fileURLToPath } from "url";
-import path, { dirname } from "path";
+import { deleteSupabaseImage } from "../helper/functions.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const accessAsync = promisify(fs.access);
-
+// Deletes the object from Supabase storage. Accepts either a raw storage path
+// or a full public URL via ?path=.
 export const deleteImage = asyncErrorHandler(async (req) => {
-  try {
-    let { path: pathName } = req.query;
+  const { path: pathName } = req.query;
 
-    if (!pathName) throw new Error("Path is required");
+  if (!pathName) throw new Error("Path is required", 412);
 
-    pathName = path.join(__dirname, "../public", pathName);
+  await deleteSupabaseImage(pathName);
 
-    console.log(pathName);
-
-    // Use promisified access
-    await accessAsync(pathName);
-
-    // Optionally delete the file
-    await promisify(fs.unlink)(pathName);
-
-    return new Response("Deleted successfully", null, 200);
-  } catch (error) {
-    if (error.code === "ENOENT") {
-      throw new Error("File not found", 404);
-    } else throw new Error(error.message || "Failed to delete image");
-  }
+  return new Response("Deleted successfully", null, 200);
 });
 
 export const getFeatureOptions = asyncErrorHandler(async (req) => {
-  try {
+  const data = await model.FeatureOptions.find({ status: 0 }).sort({ _id: -1 });
 
-    const data = await model.FeatureOptions.find({
-
-      status: 0
-
-    }).sort({ order: 1 });
-
-    return new Response(null, { data }, 200);
-
-  } catch (error) {
-
-    throw new Error(error.message);
-
-  }
-})
+  return new Response(null, { data }, 200);
+});
 
 export const addFeatureOptions = asyncErrorHandler(async (req) => {
-  try {
+  const { name } = req.body;
 
-    const { name } = req.body
+  const exists = await model.FeatureOptions.findOne({ name, status: 0 });
 
-    const exists = await model.FeatureOptions.findOne({ name });
+  if (exists) throw new Error(`${exists.name} already exists`, 400);
 
-    if (exists) throw new Error(`${exists.name} already exists`, 400);
+  const data = await model.FeatureOptions({ name }).save();
 
-    const data = await model.FeatureOptions({ name }).save()
-
-    return new Response(`Option added successfully`, { data }, 200);
-
-  } catch (error) {
-
-    throw new Error(error.message);
-
-  }
-})
+  return new Response(`Option added successfully`, { data }, 200);
+});
 
 export const getPropertyHighlights = asyncErrorHandler(async (req) => {
-  try {
+  const data = await model.propertyHiglights.find({ status: 0 }).sort({ _id: -1 });
 
-    const data = await model.propertyHiglights.find({
-
-      status: 0
-
-    }).sort({ order: 1 });
-
-    return new Response(null, { data }, 200);
-
-  } catch (error) {
-
-    throw new Error(error.message);
-
-  }
-})
+  return new Response(null, { data }, 200);
+});
 
 export const addPropertyHighlights = asyncErrorHandler(async (req) => {
-  try {
+  const { name } = req.body;
 
-    const { name } = req.body
+  const exists = await model.propertyHiglights.findOne({ name, status: 0 });
 
-    const exists = await model.propertyHiglights.findOne({ name });
+  if (exists) throw new Error(`${exists.name} already exists`, 400);
 
-    if (exists) throw new Error(`${exists.name} already exists`, 400);
+  const data = await model.propertyHiglights({ name }).save();
 
-    const data = await model.propertyHiglights({ name }).save()
-
-    return new Response(`Option added successfully`, { data }, 200);
-
-  } catch (error) {
-
-    throw new Error(error.message);
-
-  }
-})
+  return new Response(`Option added successfully`, { data }, 200);
+});
 
 export const getGalleryImages = asyncErrorHandler(async (req) => {
-  try {
+  const data = await model.destination.find({ status: 0 }).select("galleryImages").lean();
 
-    const data = await model.destination.find({ status: 0 }).select("galleryImages").lean();
+  const allGalleryImages = data.flatMap((property) => property.galleryImages || []);
 
-    const allGalleryImages = data.flatMap(
-      property => property.galleryImages || []
-    );
+  return new Response(null, { data: allGalleryImages }, 200);
+});
 
-    return new Response(null, { data: allGalleryImages }, 200);
+// Typed lookup list — the CMS calls `common/category?type=service`.
+export const getCategory = asyncErrorHandler(async (req) => {
+  const { type } = req.query;
 
-  } catch (error) {
+  const query = { status: 0 };
 
-    throw new Error(error.message);
-  }
+  if (!isNull(type)) query.type = type;
 
-})
+  const data = await model.category
+    .find(query)
+    .sort({ _id: -1 })
+    .select("label value type")
+    .lean();
+
+  return new Response(null, { data }, 200);
+});
+
+export const addCategory = asyncErrorHandler(async (req) => {
+  let { type, label, value } = req.body;
+
+  if (isNull(type)) throw new Error("Type is required", 412);
+  if (isNull(label)) throw new Error("Label is required", 412);
+
+  if (isNull(value)) value = label;
+
+  const exists = await model.category.findOne({ type, value, status: 0 });
+
+  if (exists) throw new Error(`${exists.label} already exists`, 400);
+
+  const data = await model.category({ type, label, value }).save();
+
+  return new Response(`Category added successfully`, { data }, 200);
+});

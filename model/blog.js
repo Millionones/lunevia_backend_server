@@ -24,4 +24,9 @@ const schema = new Schema(
     }
 );
 
+// slug already has a unique index (from `unique: true`).
+// List endpoints filter by status and sort by _id; category is filterable.
+schema.index({ status: 1, _id: -1 });
+schema.index({ category: 1 });
+
 export default model("blogs", schema);

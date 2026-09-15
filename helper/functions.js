@@ -66,14 +66,21 @@ export const currentTime = () => moment().format("HH:mm:ss");
 
 export const imageFileName = async (req, res) => {
   try {
-    if (!req.file) {
+    // The CMS uploads under two different field names: blogs/destinations use
+    // "file", testimonial/service use "image". Accept either.
+    const file =
+      req.file ||
+      req.files?.file?.[0] ||
+      req.files?.image?.[0];
+
+    if (!file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
     const folder = req.params.folder;
 
     // 1. Process image (resize + webp)
-    const { fileName, buffer } = await processImage(req.file.buffer);
+    const { fileName, buffer } = await processImage(file.buffer);
 
     // 2. Upload to Supabase
     const result = await uploadImage(
@@ -83,9 +90,15 @@ export const imageFileName = async (req, res) => {
       buffer
     );
 
+    // `url` for file-field callers, `new_filename` for image-field callers —
+    // both the full Supabase public URL so either read works.
     return res.status(200).json({
       status: 200,
-      data: result,
+      data: {
+        path: result.path,
+        url: result.url,
+        new_filename: result.url,
+      },
     });
   } catch (error) {
     console.error(error);
@@ -94,6 +107,27 @@ export const imageFileName = async (req, res) => {
       message: error.message,
     });
   }
+};
+
+// Resolve a Supabase storage object path from either a raw path
+// ("folder/uuid.webp") or a full public URL (".../object/public/lunevia/<path>").
+export const resolveStoragePath = (pathOrUrl = "") => {
+  if (!pathOrUrl) return "";
+  const marker = "/lunevia/";
+  const idx = pathOrUrl.indexOf(marker);
+  if (idx !== -1) return pathOrUrl.slice(idx + marker.length);
+  return pathOrUrl.replace(/^\/+/, "");
+};
+
+export const deleteSupabaseImage = async (pathOrUrl) => {
+  const filePath = resolveStoragePath(pathOrUrl);
+  if (!filePath) throw new Error("Path is required");
+
+  const { error } = await supabase.storage.from("lunevia").remove([filePath]);
+
+  if (error) throw error;
+
+  return { path: filePath };
 };
 
 export const processImage = async (buffer) => {
@@ -179,8 +213,6 @@ export const sendMail = async ({from,  subject, html }) => {
       pass: process.env.EMAIL_PASS,
     },
   });
-
-  console.log(process.env.EMAIL_USER,'jjjjjj',process.env.EMAIL_PASS)
 
   await transporter.sendMail({
     from: "luneviaEnquiry@gmail.com",

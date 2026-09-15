@@ -7,13 +7,29 @@ export const getWebsiteList = asyncErrorHandler(async (req) => {
     const { category } = req.query;
 
     const { skip, limit } = paginationParams(req.query);
-    console.log('first', req.query)
     const query = { status: 0 };
 
     if (!isNull(category)) query.category = category;
 
-    const data = await model.destination.find(query).sort({ _id: -1 }).skip(skip).limit(limit).select(unwantedFields()).lean();
-    console.log('data', data)
+    // Card list only needs the summary fields — drop the large denormalized
+    // arrays (roomDetails / galleryImages / amenties / locations) that the
+    // detail endpoint returns.
+    const rows = await model.destination
+        .find(query)
+        .sort({ _id: -1 })
+        .skip(skip)
+        .limit(limit)
+        .select(unwantedFields() + " -roomDetails -galleryImages -amenties -locations")
+        .lean();
+
+    // The cards (DestinationList/DestinationBanners/DestinationCards) read a
+    // top-level `description`; the only summary text we store is
+    // aboutProperty.description, so surface it as `description`.
+    const data = rows.map((row) => ({
+        ...row,
+        description: row.description ?? row.aboutProperty?.description ?? "",
+    }));
+
     return new Response("success", { data }, 200);
 });
 
@@ -83,7 +99,9 @@ export const addBookings = asyncErrorHandler(async (req) => {
         room
     }).save();
 
-    await sendMail({
+    // Fire-and-forget: the SMTP send can take seconds; don't make the guest
+    // wait on it. Failures are logged, not surfaced to the booking response.
+    sendMail({
         from: "luneviaBookings@gmail.com",
         subject: `New Booking From ${fullName} for ${destinationData.title}`,
 
@@ -165,7 +183,7 @@ export const addBookings = asyncErrorHandler(async (req) => {
 
                 </div>
             `,
-    })
+    }).catch((err) => console.error("Booking confirmation email failed:", err?.message || err));
 
     return new Response("Booking added successfully", {}, 201);
 });
@@ -179,7 +197,6 @@ export const getBlogList = asyncErrorHandler(async (req) => {
 
     if (!isNull(exclude)) query.slug = { $ne: exclude };
     const data = await model.blog.find(query).sort({ _id: -1 }).skip(skip).limit(limit).select(unwantedFields()).lean();
-    console.log('data', data)
     return new Response("success", { data }, 200);
 });
 
@@ -193,5 +210,17 @@ export const getBlogDetails = asyncErrorHandler(async (req) => {
     if (!data) {
         throw new Error("Data not found", 404);
     }
+    return new Response("success", { data }, 200);
+});
+
+// Public read for CMS-managed page content. Returns null data when a page has no
+// document yet — the website falls back to its hardcoded defaults in that case.
+export const getPageContent = asyncErrorHandler(async (req) => {
+    const { page } = req.params;
+
+    const data = await model.pageContent.findOne({ page, status: 0 })
+        .select(unwantedFields())
+        .lean();
+
     return new Response("success", { data }, 200);
 });

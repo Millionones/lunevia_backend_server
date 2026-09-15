@@ -7,7 +7,13 @@ const auth = asyncErrorHandler(async (req, res, next) => {
 
   if (isNull(token)) throw new Error("Authentication failed", 401);
 
-  const data = jwt.verify(token, process.env.TOKEN_SECRET);
+  let data;
+  try {
+    data = jwt.verify(token, process.env.TOKEN_SECRET);
+  } catch (err) {
+    // Expired / tampered / malformed token → clean 401 instead of a 500.
+    throw new Error("Authentication failed", 401);
+  }
 
   req.user = { _id: data.id, ...data };
 

@@ -5,6 +5,11 @@ import propertyHiglights from "./propertyHiglights.js";
 import blog from "./blog.js";
 import contact from "./contact.js";
 import bookings from "./bookings.js";
+import testimonial from "./testimonial.js";
+import service from "./service.js";
+import jobPost from "./jobPost.js";
+import category from "./category.js";
+import pageContent from "./pageContent.js";
 
 export default {
     User,
@@ -13,5 +18,10 @@ export default {
     propertyHiglights,
     blog,
     contact,
-    bookings
+    bookings,
+    testimonial,
+    service,
+    jobPost,
+    category,
+    pageContent,
 };
