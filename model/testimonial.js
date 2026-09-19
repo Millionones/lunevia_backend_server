@@ -9,8 +9,8 @@ const schema = new Schema(
         url: { type: String }, // optional video url
         image: { type: String },
         testimonial: { type: String, required: true },
-        date: { type: String, default: currentDate() },
-        time: { type: String, default: currentTime() },
+        date: { type: String, default: currentDate },
+        time: { type: String, default: currentTime },
     },
     {
         timestamps: true,

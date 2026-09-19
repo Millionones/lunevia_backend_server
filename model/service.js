@@ -42,8 +42,8 @@ const schema = new Schema(
             },
         ],
 
-        date: { type: String, default: currentDate() },
-        time: { type: String, default: currentTime() },
+        date: { type: String, default: currentDate },
+        time: { type: String, default: currentTime },
     },
     {
         timestamps: true,

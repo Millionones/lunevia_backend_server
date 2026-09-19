@@ -12,8 +12,8 @@ const schema = new Schema(
         location: { type: String },
         jobType: { type: String }, // Full-time | Part-time | Contract
         requirements: [{ type: String }],
-        date: { type: String, default: currentDate() },
-        time: { type: String, default: currentTime() },
+        date: { type: String, default: currentDate },
+        time: { type: String, default: currentTime },
     },
     {
         timestamps: true,

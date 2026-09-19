@@ -16,8 +16,8 @@ const schema = new Schema(
         checkOutTime: { type: String },
         destination: { type: Schema.Types.ObjectId, ref: "destination" },
         room: { type: String },
-        date: { type: String, default: currentDate() },
-        time: { type: String, default: currentTime() },
+        date: { type: String, default: currentDate },
+        time: { type: String, default: currentTime },
     },
     {
         timestamps: true,

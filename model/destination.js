@@ -51,8 +51,8 @@ const schema = new Schema(
 
         addedBy: { type: Schema.Types.ObjectId, ref: "user" },
         updateBy: { type: Schema.Types.ObjectId, ref: "user" },
-        date: { type: String, default: currentDate() },
-        time: { type: String, default: currentTime() },
+        date: { type: String, default: currentDate },
+        time: { type: String, default: currentTime },
         upDate: String,
         upTime: String,
     },

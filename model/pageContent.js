@@ -11,8 +11,8 @@ const schema = new Schema(
         status: { type: Number, default: 0 }, // 0 - active , 1 - deleted
         page: { type: String, required: true }, // "home" | "about" | "experience" | ...
         content: { type: Schema.Types.Mixed, default: {} },
-        date: { type: String, default: currentDate() },
-        time: { type: String, default: currentTime() },
+        date: { type: String, default: currentDate },
+        time: { type: String, default: currentTime },
     },
     {
         timestamps: true,
