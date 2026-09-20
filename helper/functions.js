@@ -1,5 +1,6 @@
 import multer from "multer";
 import moment from "moment";
+import path from "path";
 
 import { Types } from "mongoose";
 import { Error } from "express-error-catcher";
@@ -82,10 +83,11 @@ export const imageFileName = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      status: 500,
-      message: error.message,
+    console.error("image upload failed:", error?.message || error);
+    const status = error?.status || error?.statusCode || 500;
+    return res.status(status).json({
+      status,
+      message: error?.message || "Image upload failed",
     });
   }
 };
@@ -114,18 +116,25 @@ export const deleteSupabaseImage = async (pathOrUrl) => {
 export const processImage = async (buffer) => {
   const fileName = crypto.randomUUID();
 
-  const imageBuffer = await sharp(buffer)
-    .resize(1600, 1600, {
-      fit: "inside", // keeps aspect ratio
-      withoutEnlargement: true,
-    })
-    .webp({ quality: 85 })
-    .toBuffer();
+  try {
+    const imageBuffer = await sharp(buffer)
+      .rotate() // honor EXIF orientation before resizing
+      .resize(1600, 1600, {
+        fit: "inside", // keeps aspect ratio
+        withoutEnlargement: true,
+      })
+      .webp({ quality: 85 })
+      .toBuffer();
 
-  return {
-    fileName,
-    buffer: imageBuffer,
-  };
+    return {
+      fileName,
+      buffer: imageBuffer,
+    };
+  } catch (err) {
+    // Corrupt / unsupported / undecodable image — surface a clean 422 instead of
+    // an opaque 500 so the CMS can show an actionable message.
+    throw new Error("Unsupported or corrupt image file", 422);
+  }
 };
 
 export const uploadImage = async (supabase, folder, fileName, buffer) => {
