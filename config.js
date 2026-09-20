@@ -22,6 +22,10 @@ export const cookieOptions = {
 };
 
 export const frontendUrls = [
+  // Both the apex and www hosts: the site is reachable at either, and a
+  // credentialed browser request from an un-whitelisted origin is silently
+  // blocked by CORS (no response) — which breaks every admin write.
+  "https://lunevia.in",
   "https://www.lunevia.in",
   "https://lunevia.vercel.app",
   "http://localhost:3000",
