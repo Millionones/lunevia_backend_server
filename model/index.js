@@ -10,6 +10,7 @@ import service from "./service.js";
 import jobPost from "./jobPost.js";
 import category from "./category.js";
 import pageContent from "./pageContent.js";
+import luna from "./luna.js";
 
 export default {
     User,
@@ -24,4 +25,5 @@ export default {
     jobPost,
     category,
     pageContent,
+    luna,
 };

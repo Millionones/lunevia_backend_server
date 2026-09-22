@@ -159,6 +159,24 @@ export const uploadImage = async (supabase, folder, fileName, buffer) => {
   };
 };
 
+// CMS descriptions/answers are stored as Quill HTML. Luna needs clean plain
+// text (the chat renders text, not markup), so strip tags and decode the few
+// common entities Quill emits. Keep it dependency-free.
+export const stripHtml = (html = "") => {
+  if (!html || typeof html !== "string") return "";
+  return html
+    .replace(/<\s*(br|\/p|\/div|\/li|\/h[1-6])\s*>/gi, " ") // block ends → space
+    .replace(/<[^>]+>/g, "") // drop remaining tags
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/\s+/g, " ") // collapse whitespace
+    .trim();
+};
+
 export const generatePermalink = (str) => {
   var code = str
     .toLowerCase()
