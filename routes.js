@@ -26,6 +26,8 @@ import jobPostRouter from "./routes/jobPost.router.js";
 
 import pageContentRouter from "./routes/pageContent.router.js";
 
+import lunaRouter from "./routes/luna.router.js";
+
 router.use("/", indexRouter);
 
 router.use("/auth", authRouter);
@@ -49,5 +51,7 @@ router.use("/service", serviceRouter);
 router.use("/job-post", jobPostRouter);
 
 router.use("/page-content", pageContentRouter);
+
+router.use("/luna", lunaRouter);
 
 export default router;

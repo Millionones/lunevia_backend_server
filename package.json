@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "seed:admin": "node scripts/seed-admin.js"
+    "seed:admin": "node scripts/seed-admin.js",
+    "seed:luna": "node scripts/seed-luna.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",
