@@ -1,6 +1,7 @@
 import { asyncErrorHandler, Error, Response } from "express-error-catcher";
 import model from "../model/index.js";
 import { stripHtml, unwantedFields } from "../helper/functions.js";
+import { WEBSITE_FAQS, WEBSITE_FACTS } from "../data/luna-knowledge.js";
 
 // How long a stored knowledge doc is trusted before the public read lazily
 // rebuilds it from live CMS data (keeps Luna in sync without a cron job).
@@ -43,6 +44,10 @@ const toTags = (text = "") =>
         )
     );
 
+// Normalize a question for dedup: lowercase, drop punctuation, collapse spaces.
+const normQ = (q = "") =>
+    String(q).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
 // Aggregate the whole Luna knowledge base from live collections.
 const buildKnowledge = async () => {
     const faqs = [];
@@ -71,6 +76,18 @@ const buildKnowledge = async () => {
             const a = stripHtml(item?.a ?? item?.answer);
             if (q && a) faqs.push({ q, a, tags: toTags(`${q} ${group?.heading || ""}`) });
         }
+    }
+
+    // 2b. Curated baseline (real Crown Woods FAQs + website facts). CMS-authored
+    // FAQs above win; the baseline only fills questions the CMS hasn't answered,
+    // so Luna always knows the essentials even on a fresh/unseeded database.
+    const seen = new Set(faqs.map((f) => normQ(f.q)));
+    for (const item of [...WEBSITE_FAQS, ...WEBSITE_FACTS]) {
+        const q = stripHtml(item?.q);
+        const a = stripHtml(item?.a);
+        if (!q || !a || seen.has(normQ(q))) continue;
+        seen.add(normQ(q));
+        faqs.push({ q, a, tags: toTags(`${q} ${item?.heading || ""}`) });
     }
 
     // 3. Destinations + their embedded rooms.
